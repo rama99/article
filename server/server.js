@@ -10,6 +10,10 @@ require('dotenv').config();
 const app = express();
 
 
+// routes
+const authRoutes = require('./routes/auth');
+
+
 // database connect
 mongoose
     .connect(process.env.DATABASE_LOCAL, { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false, useUnifiedTopology: true })
@@ -23,6 +27,9 @@ mongoose
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+// routes middleware
+app.use('/api', authRoutes);
 
 // cors
 if (process.env.NODE_ENV === 'development') {
