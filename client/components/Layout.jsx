@@ -1,8 +1,10 @@
+import Header from './Header';
 
 const Layout = ({children}) => {
 
     return (
-        <React.Fragment>            
+        <React.Fragment> 
+            <Header/>           
             {children}          
         </React.Fragment>
     )
