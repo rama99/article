@@ -12,6 +12,7 @@ const app = express();
 
 // routes
 const authRoutes = require('./routes/auth');
+const categoryRoutes = require('./routes/category');
 
 
 // database connect
@@ -30,6 +31,7 @@ app.use(cookieParser());
 
 // routes middleware
 app.use('/api', authRoutes);
+app.use('/api', categoryRoutes);
 
 // cors
 if (process.env.NODE_ENV === 'development') {
