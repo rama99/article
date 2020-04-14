@@ -29,6 +29,9 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+// cors
+app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
+
 // routes middleware
 app.use('/api', authRoutes);
 app.use('/api', categoryRoutes);
