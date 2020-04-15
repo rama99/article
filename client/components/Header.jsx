@@ -45,7 +45,7 @@ const Header = () => {
             {
               isAuth() &&  (<React.Fragment>  
                                 <NavItem>
-                                    <Link href="/admin">
+                                    <Link href="/admin/admin">
                                       <NavLink>{`${isAuth().name}'s Dashboard`}</NavLink>
                                     </Link>
                                 </NavItem>
