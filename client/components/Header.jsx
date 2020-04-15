@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 import { APP_NAME } from '../config';
+import {isAuth , signout } from '../actions/auth';
 
 import {
   Collapse,
@@ -40,13 +41,23 @@ const Header = () => {
         <Collapse isOpen={isOpen} navbar>
 
           <Nav className="ml-auto" navbar>
-            <React.Fragment>
-              <NavItem>
-                <Link href="/blogs">
-                  <NavLink>Link here.</NavLink>
-                </Link>
-              </NavItem>
-            </React.Fragment>
+            
+            {
+              isAuth() &&  (<React.Fragment>  
+                                <NavItem>
+                                    <Link href="/admin">
+                                      <NavLink>{`${isAuth().name}'s Dashboard`}</NavLink>
+                                    </Link>
+                                </NavItem>
+                                <NavItem>
+                                  <NavLink style={{ cursor: 'pointer' }} onClick={() => signout(() => Router.replace(`/`))}>
+                                    Signout
+                                  </NavLink>
+                                </NavItem>                                
+                            </React.Fragment>
+              )
+            }
+            
             
           </Nav>
         </Collapse>

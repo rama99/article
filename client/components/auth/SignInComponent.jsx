@@ -33,7 +33,7 @@ const SignInComponent = () => {
                 // save user info to localstorage
                 // authenticate user
                 authenticate(data, () => {                   
-                    Router.push(`/admin`);                   
+                    Router.push(`/`);                   
                 });
             }
         });
