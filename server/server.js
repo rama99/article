@@ -12,6 +12,7 @@ const app = express();
 
 // routes
 const authRoutes = require('./routes/auth');
+const articleRoutes = require('./routes/article');
 const categoryRoutes = require('./routes/category');
 
 
@@ -35,6 +36,7 @@ app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
 // routes middleware
 app.use('/api', authRoutes);
 app.use('/api', categoryRoutes);
+app.use('/api', articleRoutes);
 
 // cors
 if (process.env.NODE_ENV === 'development') {
