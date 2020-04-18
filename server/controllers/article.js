@@ -6,9 +6,11 @@ const stripHtml = require('string-strip-html');
 const _ = require('lodash');
 const { errorHandler } = require('../helpers/dbErrorHandler');
 const fs = require('fs');
-const { smartTrim } = require('../helpers/article');
+const { smartTrim } = require('../helpers/article'); 
 
-exports.create = (req, res) => {
+
+exports.create = async (req, res) => {
+
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -59,124 +61,128 @@ exports.create = (req, res) => {
             article.photo.data = fs.readFileSync(files.photo.path);
             article.photo.contentType = files.photo.type;
         }
-
-        article.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
-                    error: errorHandler(err)
-                });
-            }
-            // res.json(result);
-            Article.findByIdAndUpdate(result._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec(
-                (err, result) => {
-                    if (err) {
-                        return res.status(400).json({
-                            error: errorHandler(err)
-                        });
-                    } 
-                }
-            );
-        });
     });
+
+    try {
+            const result0 = await article.save();
+            const result = await Article.findByIdAndUpdate(result0._id, { $push: { categories: arrayOfCategories } }, { new: true });
+            res.json(result);
+
+    }
+    catch(err) {
+            return res.status(400).json({
+                error: errorHandler(err)
+            });
+    }
+   
 };
 
 
+exports.list = async (req, res) => {
 
-exports.list = (req, res) => {
-    Article.find({})
+    try {
+
+      let data =  await Article.find({})
         .populate('categories', '_id name slug')        
         .populate('postedBy', '_id name username')
-        .select('_id title slug excerpt categories postedBy createdAt updatedAt')
-        .exec((err, data) => {
-            if (err) {
-                return res.json({
-                    error: errorHandler(err)
-                });
-            }
-            res.json(data);
+        .select('_id title slug excerpt categories postedBy createdAt updatedAt');
+        
+        res.json(data);
+        
+    }
+    catch(err) {
+        return res.json({
+            error: errorHandler(err)
         });
+    }
+    
 };
 
-exports.listAllAriticlesCategories = (req, res) => {
+
+exports.listAllAriticlesCategories = async (req, res) => {
     let limit = req.body.limit ? parseInt(req.body.limit) : 10;
     let skip = req.body.skip ? parseInt(req.body.skip) : 0;
 
     let articles;
-    let categories;    
+    let categories;
+    
+    try {
 
-    Article.find({})
-        .populate('categories', '_id name slug')       
-        .populate('postedBy', '_id name username profile')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .select('_id title slug excerpt categories postedBy createdAt updatedAt')
-        .exec((err, data) => {
-            if (err) {
-                return res.json({
-                    error: errorHandler(err)
-                });
-            }
-            articles = data; 
-            // get all categories
-            Category.find({}).exec((err, c) => {
-                if (err) {
-                    return res.json({
-                        error: errorHandler(err)
-                    });
-                }
-                categories = c; // categories
+        const data = await Article.find({})
+                        .populate('categories', '_id name slug')       
+                        .populate('postedBy', '_id name username profile')
+                        .sort({ createdAt: -1 })
+                        .skip(skip)
+                        .limit(limit)
+                        .select('_id title slug excerpt categories postedBy createdAt updatedAt');
 
-                res.json({ blogs, categories, size: blogs.length });                
-            });
+        articles = data;   
+        
+        // get all categories
+        let c = await Category.find({});
+        categories = c; // categories
+        res.json({ articles, categories, size: articles.length }); 
+
+    }
+    catch(err) {
+        return res.json({
+            error: errorHandler(err)
         });
+    }       
 };
 
-exports.read = (req, res) => {
-    const slug = req.params.slug.toLowerCase();
-    Article.findOne({ slug })
-        // .select("-photo")
-        .populate('categories', '_id name slug')      
-        .populate('postedBy', '_id name username')
-        .select('_id title body slug mtitle mdesc categories postedBy createdAt updatedAt')
-        .exec((err, data) => {
-            if (err) {
-                return res.json({
-                    error: errorHandler(err)
-                });
-            }
-            res.json(data);
+
+exports.read = async (req, res) => {
+
+    try {
+        const slug = req.params.slug.toLowerCase();
+
+        const data = await   Article.findOne({ slug })
+                                // .select("-photo")
+                                .populate('categories', '_id name slug')      
+                                .populate('postedBy', '_id name username')
+                                .select('_id title body slug mtitle mdesc categories postedBy createdAt updatedAt');
+        res.json(data);                        
+                                
+    }
+    catch(err) {
+        return res.json({
+            error: errorHandler(err)
         });
+    }       
 };
 
-exports.remove = (req, res) => {
-    const slug = req.params.slug.toLowerCase();
-    Article.findOneAndRemove({ slug }).exec((err, data) => {
-        if (err) {
-            return res.json({
-                error: errorHandler(err)
-            });
-        }
+
+exports.remove = async (req, res) => {
+
+    try {
+        const slug = req.params.slug.toLowerCase();
+        await Article.findOneAndRemove({ slug });
         res.json({
             message: 'Article deleted successfully'
         });
-    });
+    }
+    catch(err) {
+        return res.json({
+            error: errorHandler(err)
+        });
+    }
+   
 };
 
-exports.update = (req, res) => {
+
+exports.update = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
 
-    Article.findOne({ slug }).exec((err, oldArticle) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err)
-            });
-        }
+    try {
 
-        let form = new formidable.IncomingForm();
+      const  oldArticle = Article.findOne({ slug });
+
+      let form = new formidable.IncomingForm();
         form.keepExtensions = true;
 
         form.parse(req, (err, fields, files) => {
+
             if (err) {
                 return res.status(400).json({
                     error: 'Image could not upload'
@@ -209,31 +215,45 @@ exports.update = (req, res) => {
                 oldArticle.photo.contentType = files.photo.type;
             }
 
-            oldArticle.save((err, result) => {
-                if (err) {
-                    return res.status(400).json({
-                        error: errorHandler(err)
-                    });
-                }
-                // result.photo = undefined;
-                res.json(result);
-            });
+            const result = oldArticle.save();
+            // result.photo = undefined;
+            res.json(result);
+           
         });
-    });
+
+    }
+    catch(err) { 
+
+            return res.status(400).json({
+                error: errorHandler(err)
+            });
+    }
+    
 };
 
-exports.photo = (req, res) => {
+exports.photo = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
-    Article.findOne({ slug })
-        .select('photo')
-        .exec((err, article) => {
-            if (err || !article) {
-                return res.status(400).json({
-                    error: errorHandler(err)
-                });
-            }
-            res.set('Content-Type', article.photo.contentType);
-            return res.send(article.photo.data);
+
+    try {
+       const article = await Article.findOne({ slug })
+                              .select('photo');
+
+        if (!article) {
+            return res.status(400).json({
+                error: errorHandler(`error`)
+            });  
+        } 
+        
+        res.set('Content-Type', article.photo.contentType);
+        res.send(article.photo.data);
+
+    }
+    catch(err) {
+        return res.status(400).json({
+            error: errorHandler(err)
         });
+    }    
+      
 };
+
 
