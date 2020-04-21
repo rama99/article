@@ -11,6 +11,8 @@ const { smartTrim } = require('../helpers/article');
 
 exports.create = async (req, res) => {
 
+    let article = new Article();
+    let arrayOfCategories;
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -39,9 +41,9 @@ exports.create = async (req, res) => {
                 error: 'At least one category is required'
             });
         }
-        
 
-        let article = new Article();
+        console.log(    `form DONE.......`);
+        
         article.title = title;
         article.body = body;
         article.excerpt = smartTrim(body, 320, ' ', ' ...');
@@ -50,7 +52,7 @@ exports.create = async (req, res) => {
         article.mdesc = stripHtml(body.substring(0, 160));
         article.postedBy = req.user._id;
         // categories 
-        let arrayOfCategories = categories && categories.split(',');        
+        arrayOfCategories = categories && categories.split(',');        
 
         if (files.photo) {
             if (files.photo.size > 10000000) {
@@ -64,12 +66,16 @@ exports.create = async (req, res) => {
     });
 
     try {
-            const result0 = await article.save();
-            const result = await Article.findByIdAndUpdate(result0._id, { $push: { categories: arrayOfCategories } }, { new: true });
+            console.log(`article ${article}`); 
+            const result0 = await article.save(); 
+            console.log(`HERE `);    
+            let result;        
+            result = await Article.findByIdAndUpdate(result0._id, { $push: { categories: arrayOfCategories } }, { new: true });
             res.json(result);
 
     }
-    catch(err) {
+    catch(err) {   
+            console.log(`err ${err}`);    
             return res.status(400).json({
                 error: errorHandler(err)
             });
@@ -125,6 +131,7 @@ exports.listAllAriticlesCategories = async (req, res) => {
 
     }
     catch(err) {
+       
         return res.json({
             error: errorHandler(err)
         });
