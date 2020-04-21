@@ -4,8 +4,8 @@ import { withRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { useState } from 'react';
 import { listArticlesWithCategories  } from '../actions/article';
-//import Card from '../components/Card';
-import { API,  APP_NAME, FB_APP_ID } from '../config';
+import Card from '../components/article/Card';
+import { API,  APP_NAME  } from '../config';
 
 const Index = ({ articles, categories,  totalArticles, articlesLimit, articleSkip, router }) => {
     const head = () => (
@@ -104,8 +104,8 @@ const Index = ({ articles, categories,  totalArticles, articlesLimit, articleSki
                             </section>
                         </header>
                     </div>
-                   {/* <div className="container-fluid">{showAllArticles()}</div> */}
-                   {/* <div className="container-fluid">{showLoadedArticles()}</div> */}
+                    <div className="container-fluid">{showAllArticles()}</div>
+                    <div className="container-fluid">{showLoadedArticles()}</div>
                     <div className="text-center pt-5 pb-5">{loadMoreButton()}</div>
                 </main>
             </Layout>
