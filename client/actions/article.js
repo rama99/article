@@ -39,3 +39,13 @@ export const listArticlesWithCategories = (skip, limit) => {
         .catch(err => console.log(err));
 };
 
+export const singleArticle = slug => {
+    return fetch(`${API}/articles/${slug}`, {
+        method: 'GET'
+    })
+        .then(response => {
+            return response.json();
+        })
+        .catch(err => console.log(err));
+};
+
